@@ -120,4 +120,4 @@ def main(page: ft.Page):
     )
 
 # Eksekusi Flet untuk mode aplikasi murni (APK)
-ft.app(target=main)
+ft.app(main)
