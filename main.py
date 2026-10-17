@@ -1,5 +1,4 @@
 import flet as ft
-import yt_dlp
 import os
 
 def main(page: ft.Page):
@@ -9,21 +8,8 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    # Fungsi otomatis meminta izin penyimpanan saat aplikasi dibuka (Khusus Android)
-    def request_permissions():
-        try:
-            import permission_handler as ph
-            # Meminta izin akses storage/manage external storage
-            ph.Permission.STORAGE.request()
-            ph.Permission.MANAGE_EXTERNAL_STORAGE.request()
-        except Exception:
-            pass
-
-    # Jalankan permintaan izin saat halaman dimuat
-    page.on_load = lambda _: request_permissions()
-
     # Komponen Teks
-    judul = ft.Text("Menu Downloader", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
+    judul = ft.Text("Menu Download", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
     subtitle = ft.Text("YouTube | Facebook | Instagram | TikTok", size=12, color=ft.colors.WHITE70)
     
     # Input URL dan Dropdown
@@ -58,12 +44,15 @@ def main(page: ft.Page):
             page.update()
             return
 
-        status_text.value = "⏳ Mengunduh..."
+        status_text.value = "⏳ Mengunduh ..."
         status_text.color = ft.colors.CYAN
         progress_ring.visible = True
         page.update()
 
         try:
+            # Import yt-dlp di dalam fungsi (lazy import) agar aplikasi tidak crash saat dibuka
+            import yt_dlp
+
             save_path = "/storage/emulated/0/Download/AppSosmed"
             if not os.path.exists(save_path):
                 os.makedirs(save_path, exist_ok=True)
@@ -90,7 +79,7 @@ def main(page: ft.Page):
             page.update()
 
     tombol = ft.ElevatedButton(
-        "DOWNLOAD SEKARANG", 
+        "Download Sekarang", 
         on_click=download_clicked,
         bgcolor=ft.colors.CYAN,
         color=ft.colors.BLACK,
@@ -110,4 +99,4 @@ def main(page: ft.Page):
         status_text
     )
 
-ft.app(main)
+ft.app(target=main)
