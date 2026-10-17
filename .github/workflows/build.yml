@@ -1,4 +1,4 @@
-name: Build APK RyotaXD
+name: Build AppSosmed
 
 on: 
   workflow_dispatch:
@@ -21,12 +21,17 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
       - name: Build APK Flet
         run: yes | flet build apk --product "AppSosmed" --org "com.appsosmed"
-
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: RyotaXD-Downloader-APK
+          name: AppSosmed-APK
           path: build/apk/**/*.apk
