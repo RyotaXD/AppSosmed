@@ -7,52 +7,48 @@ def main(page: ft.Page):
     page.padding = 30
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.scroll = ft.ScrollMode.ADAPTIVE
 
-    # Komponen Teks
-    judul = ft.Text("Menu Download", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
-    subtitle = ft.Text("YouTube | Facebook | Instagram | TikTok", size=12, color=ft.colors.WHITE70)
-    
-    # Input URL dan Dropdown
+    # Komponen UI Dasar
+    judul = ft.Text("Menu Downloader", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
     url_input = ft.TextField(
         label="Tempel Link / URL Disini", 
-        hint_text="https://...",
         border_color=ft.colors.MAGENTA,
         width=320,
         border_radius=10
     )
     
-    platform_dropdown = ft.Dropdown(
-        label="Pilih Platform",
-        width=320,
-        border_color=ft.colors.MAGENTA,
-        border_radius=10,
-        options=[
-            ft.dropdown.Option("YouTube"),
-            ft.dropdown.Option("Facebook"),
-            ft.dropdown.Option("Instagram"),
-            ft.dropdown.Option("TikTok")
-        ]
-    )
-    
-    status_text = ft.Text("Status: Siap mendownload", color=ft.colors.YELLOW)
+    status_text = ft.Text("Status: Siap digunakan", color=ft.colors.YELLOW)
     progress_ring = ft.ProgressRing(visible=False, color=ft.colors.CYAN)
 
     def download_clicked(e):
-        if not url_input.value or not platform_dropdown.value:
-            status_text.value = "❌ URL dan Platform harus diisi!"
+        if not url_input.value:
+            status_text.value = "❌ URL tidak boleh kosong!"
             status_text.color = ft.colors.RED
             page.update()
             return
 
-        status_text.value = "⏳ Mengunduh ..."
+        status_text.value = "⏳ Sedang memproses data"
         status_text.color = ft.colors.CYAN
         progress_ring.visible = True
         page.update()
 
         try:
-            # Import yt-dlp di dalam fungsi (lazy import) agar aplikasi tidak crash saat dibuka
+            # LAZY IMPORT: Modul dipanggil di sini agar Android tidak blank saat loading awal
             import yt_dlp
+            import requests
+            from rich.console import Console
 
+            console = Console()
+            console.log(f"Mencoba mengakses: {url_input.value}")
+
+            # Validasi URL sederhana menggunakan requests
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            res = requests.head(url_input.value, headers=headers, allow_redirects=True, timeout=5)
+            if res.status_code >= 400:
+                console.log("URL mungkin tidak valid atau diblokir.")
+
+            # Menyiapkan folder penyimpanan di Android
             save_path = "/storage/emulated/0/Download/AppSosmed"
             if not os.path.exists(save_path):
                 os.makedirs(save_path, exist_ok=True)
@@ -65,21 +61,25 @@ def main(page: ft.Page):
                 'no_warnings': True,
             }
 
+            status_text.value = "⏳ Sedang mengunduh video..."
+            page.update()
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url_input.value])
 
-            status_text.value = "✅ Berhasil! Cek folder Download/AppSosmed"
+            status_text.value = "✅ Sukses! Cek folder Download/AppSosmed"
             status_text.color = ft.colors.GREEN
             url_input.value = ""
+
         except Exception as ex:
-            status_text.value = f"❌ Gagal mendownload"
+            status_text.value = f"❌ Gagal: Terjadi kesalahan saat download"
             status_text.color = ft.colors.RED
         finally:
             progress_ring.visible = False
             page.update()
 
     tombol = ft.ElevatedButton(
-        "Download Sekarang", 
+        "DOWNLOAD", 
         on_click=download_clicked,
         bgcolor=ft.colors.CYAN,
         color=ft.colors.BLACK,
@@ -89,9 +89,7 @@ def main(page: ft.Page):
 
     page.add(
         judul,
-        subtitle,
         ft.Divider(height=20, color=ft.colors.TRANSPARENT),
-        platform_dropdown,
         url_input,
         tombol,
         ft.Divider(height=15, color=ft.colors.TRANSPARENT),
