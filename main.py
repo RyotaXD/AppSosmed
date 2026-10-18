@@ -8,8 +8,11 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.scroll = ft.ScrollMode.ADAPTIVE
-    judul = ft.Text("Menu Downloader", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
-    subtitle = ft.Text("Support Bulk URL", size=12, color=ft.colors.WHITE70)
+
+    # UI Komponen
+    judul = ft.Text("APPSOSMED DOWNLOADER", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
+    subtitle = ft.Text("Versi Ultimate | Support Bulk URL", size=12, color=ft.colors.WHITE70)
+    
     platform_dropdown = ft.Dropdown(
         label="Pilih Platform Target",
         width=320,
@@ -22,6 +25,7 @@ def main(page: ft.Page):
             ft.dropdown.Option("TikTok")
         ]
     )
+
     url_input = ft.TextField(
         label="Tempel Link (Banyak link? Pisahkan dgn spasi/enter)", 
         multiline=True,
@@ -31,6 +35,7 @@ def main(page: ft.Page):
         width=320,
         border_radius=10
     )
+    
     status_text = ft.Text("Status: Siap mendownload", color=ft.colors.YELLOW, text_align=ft.TextAlign.CENTER)
     progress_bar = ft.ProgressBar(width=320, visible=False, color=ft.colors.CYAN)
 
@@ -40,9 +45,11 @@ def main(page: ft.Page):
             status_text.color = ft.colors.RED
             page.update()
             return
+
         urls = [u.strip() for u in url_input.value.replace(",", " ").split() if u.strip()]
         if not urls: return
-        status_text.value = "⏳ Sedang menyiapkan"
+
+        status_text.value = "⏳ Menyiapkan mesin..."
         status_text.color = ft.colors.CYAN
         progress_bar.visible = True
         page.update()
@@ -54,15 +61,19 @@ def main(page: ft.Page):
             from bs4 import BeautifulSoup
             import re
             import time
+
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             session = requests.Session()
+
             platform = platform_dropdown.value
             base_path = f"/storage/emulated/0/Download/AppSosmed/{platform}"
             if not os.path.exists(base_path):
                 os.makedirs(base_path, exist_ok=True)
+
             for index, url in enumerate(urls, 1):
                 status_text.value = f"⏳ Mengunduh {index} dari {len(urls)}...\n[Target: {url[:25]}...]"
                 page.update()
+
                 if platform == "TikTok":
                     user_ip, user_loc = "140.213.39.86", "ID"
                     try:
@@ -73,10 +84,12 @@ def main(page: ft.Page):
                                 if p[0] == 'ip': user_ip = p[1]
                                 if p[0] == 'loc': user_loc = p[1]
                     except: pass
+
                     html_home = session.get("https://ssstik.io/id", verify=False, timeout=10).text
                     token_tt = "Y0FLY3E_"
                     m = re.search(r'name="tt"\s+value="([^"]+)"', html_home)
                     if m: token_tt = m.group(1)
+
                     dl_headers = {
                         "Host": "ssstik.io",
                         "User-Agent": "Mozilla/5.0 (Linux; Android 14; V2201 Build/UP1A.231005.007)",
@@ -86,15 +99,18 @@ def main(page: ft.Page):
                         "Referer": "https://ssstik.io/id"
                     }
                     post_data = {"id": url, "locale": "id", "tt": token_tt, "debug": f"ab=1&loc={user_loc}&ip={user_ip}"}
+                    
                     res = session.post("https://ssstik.io/abc?url=dl", data=post_data, headers=dl_headers, verify=False, timeout=10).text
                     soup = BeautifulSoup(res, "html.parser")
                     user_node = soup.select_one('#avatarAndTextUsual h2')
                     username = user_node.text.strip() if user_node else "TikToker"
+                    
                     video_node = soup.find("a", class_=lambda x: x and "without_watermark" in x)
                     if video_node:
                         video_url = video_node.get("href")
                         filename = f"{re.sub(r'[^\w\-_\.]', '', username)}_{int(time.time())}.mp4"
                         filepath = os.path.join(base_path, filename)
+                        
                         res_file = session.get(video_url, stream=True, verify=False, timeout=30)
                         with open(filepath, 'wb') as f:
                             for chunk in res_file.iter_content(chunk_size=1024*1024):
@@ -112,11 +128,13 @@ def main(page: ft.Page):
                     }
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         ydl.download([url])
+
             status_text.value = f"✅ PROSES SELESAI!\nCek Folder: Download/AppSosmed/{platform}"
             status_text.color = ft.colors.GREEN
             url_input.value = ""
+
         except Exception as ex:
-            status_text.value = f"❌ Terjadi kesalahan pada sistem."
+            status_text.value = f"❌ Terjadi kesalahan saat memproses data."
             status_text.color = ft.colors.RED
         finally:
             progress_bar.visible = False
@@ -144,3 +162,4 @@ def main(page: ft.Page):
     )
 
 ft.app(target=main)
+    
