@@ -10,7 +10,7 @@ def main(page: ft.Page):
     page.scroll = ft.ScrollMode.ADAPTIVE
 
     # UI Komponen
-    judul = ft.Text("APPSOSMED DOWNLOADER", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
+    judul = ft.Text("Menu Downloader", size=22, weight=ft.FontWeight.BOLD, color=ft.colors.CYAN)
     subtitle = ft.Text("Versi Ultimate | Support Bulk URL", size=12, color=ft.colors.WHITE70)
     
     platform_dropdown = ft.Dropdown(
@@ -161,5 +161,6 @@ def main(page: ft.Page):
         status_text
     )
 
-ft.app(main)
+if __name__ == "__main__":
+    ft.app(target=main)
     
