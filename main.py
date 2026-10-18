@@ -161,5 +161,5 @@ def main(page: ft.Page):
         status_text
     )
 
-ft.app(target=main)
+ft.app(main)
     
