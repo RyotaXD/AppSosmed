@@ -28,7 +28,7 @@ jobs:
           channel: 'stable'
 
       - name: Build APK Flet
-        run: flet build apk --product "AppSosmed" --org "com.appsosmed"
+        run: flet build apk --product "AppSosmed" --org "com.appsosmed" --verbose
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
